@@ -1,0 +1,84 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    11/14/21 17:23:01
+mandel.asm						     Page 1 - 1
+
+
+				comment *
+				ml /c /AT /Fl mandel.asm
+				link16 /t mandel;
+				*
+
+				.model tiny
+				.386
+ 0000				.code
+					org	0100h
+ 0100				start:
+ 0100  B0 13				mov	al, 13h
+ 0102  CD 10				int	10h
+ 0104  C4 07				les	ax, [bx]
+ 0106				L0106:
+ 0106  99				cwd
+ 0107  8B C7				mov	ax, di
+ 0109  B9 0140				mov	cx, 0140h
+ 010C  F7 F1				div	cx
+ 010E  83 E8 64				sub	ax, 64h
+ 0111  FE CE				dec	dh
+ 0113  33 DB				xor	bx, bx
+ 0115  33 F6				xor	si, si
+ 0117				L0117:
+ 0117  8B EE				mov	bp, si
+ 0119  0F AF F3				imul	si, bx
+ 011C  03 F6				add	si, si
+ 011E  0F AF DB				imul	bx, bx
+ 0121  70 19				jo	L013C
+ 0123  0F AF ED				imul	bp, bp
+ 0126  70 14				jo	L013C
+ 0128  03 DD				add	bx, bp
+ 012A  70 10				jo	L013C
+ 012C  2B DD				sub	bx, bp
+ 012E  2B DD				sub	bx, bp
+ 0130  C1 FB 06				sar	bx, 06h
+ 0133  03 DA				add	bx, dx
+ 0135  C1 FE 06				sar	si, 06h
+ 0138  03 F0				add	si, ax
+ 013A  E2 DB				loop	L0117
+ 013C				L013C:
+ 013C  91				xchg	ax, cx
+ 013D  AA				stosb
+ 013E  EB C6				jmp	L0106
+
+				end	start
+Microsoft (R) Macro Assembler Version 6.14.8444		    11/14/21 17:23:01
+mandel.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0140	  Word	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	16 Bit	 0000	  Word	  Public  'DATA'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0001h	 
+@code  . . . . . . . . . . . . .	Text   	 DGROUP
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+L0106  . . . . . . . . . . . . .	L Near	 0106	  _TEXT	
+L0117  . . . . . . . . . . . . .	L Near	 0117	  _TEXT	
+L013C  . . . . . . . . . . . . .	L Near	 013C	  _TEXT	
+start  . . . . . . . . . . . . .	L Near	 0100	  _TEXT	
+
+	   0 Warnings
+	   0 Errors

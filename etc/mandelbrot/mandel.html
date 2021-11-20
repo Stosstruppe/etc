@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>mandel</title>
+<style>
+canvas {
+	width: 640px;
+	image-rendering: pixelated;
+}
+</style>
+</head>
+
+<body>
+<canvas id="canvas" width="320" height="200"></canvas>
+<script>
+
+"use strict";
+
+onload = function() {
+	let ctx = canvas.getContext("2d");
+	ctx.fillStyle = "#000000";
+	ctx.fillRect(0, 0, 320, 200);
+
+	let imgData = ctx.getImageData(0, 0, 320, 200);
+	let data = imgData.data;
+
+	for (let i = 0; i < 64000; i++) {
+		let ca = i % 320 - 256;	// dx
+		let cb = Math.floor(i / 320) - 100;	// ax
+
+		let a = 0;	// bx
+		let b = 0;	// si
+		let c = 16;	// cx
+		do {
+			let t = b;	// bp
+			b *= a;
+			b += b;
+			a *= a;
+			if (a > 0x7fff) break;
+			t *= t;
+			if (t > 0x7fff) break;
+			a += t;
+			if (a > 0x7fff || a < -0x8000) break;
+			a -= t;
+			a -= t;
+			a >>= 6;
+			a += ca;
+			b >>= 6;
+			b += cb;
+		} while (--c);
+
+		data[i * 4 + 1] = c * 16;
+	}
+
+	ctx.putImageData(imgData, 0, 0);
+};
+
+</script>
+</body>
+</html>

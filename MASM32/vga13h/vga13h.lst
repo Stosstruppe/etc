@@ -1,0 +1,60 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    11/14/21 19:07:15
+vga13h.asm						     Page 1 - 1
+
+
+				comment *
+				ml /c /AT /Fl vga13h.asm
+				link16 /t vga13h;
+				*
+
+				.model tiny
+				.8086
+ 0000				.code
+					org	0100h
+ 0100				start:
+ 0100  B0 13				mov	al, 13h
+ 0102  CD 10				int	10h
+ 0104  C4 07				les	ax, [bx]
+ 0106				L1:
+ 0106  8B C7				mov	ax, di
+ 0108  33 D2				xor	dx, dx
+ 010A  B9 0140				mov	cx, 320
+ 010D  F7 F1				div	cx
+ 010F  8A C2				mov	al, dl
+ 0111  AA				stosb
+ 0112  EB F2				jmp	L1
+
+				end	start
+Microsoft (R) Macro Assembler Version 6.14.8444		    11/14/21 19:07:15
+vga13h.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0114	  Word	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	16 Bit	 0000	  Word	  Public  'DATA'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0001h	 
+@code  . . . . . . . . . . . . .	Text   	 DGROUP
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+L1 . . . . . . . . . . . . . . .	L Near	 0106	  _TEXT	
+start  . . . . . . . . . . . . .	L Near	 0100	  _TEXT	
+
+	   0 Warnings
+	   0 Errors
