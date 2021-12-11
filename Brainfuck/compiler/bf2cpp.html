@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>bf2cpp</title>
+</head>
+
+<body>
+<h1>Brain**ck compiler</h1>
+Brain**ck source:<br>
+<textarea id="bfsrc" cols="80" rows="5">
+++++++++[>++++++++<-]>.+.+.+.
+</textarea><br>
+<input type="button" value="compile" onclick="compile();"><br><br>
+C++ source:<br>
+<textarea id="output" cols="80" rows="15"></textarea>
+<script>
+
+"use strict";
+
+const header = `\
+#include <stdio.h>
+#define putc(c) { putchar(c); fflush(stdout); }
+char cells[30000];
+char *p = cells;
+int main() {
+`;
+
+const footer = `\
+}
+`;
+
+function compile() {
+	let log = header;
+	let cmd = bfsrc.value;
+	for (let i = 0; i < cmd.length; i++) {
+		switch (cmd.charAt(i)) {
+		case '>': log += "\tp++;\n"; break;
+		case '<': log += "\tp--;\n"; break;
+		case '+': log += "\t(*p)++;\n"; break;
+		case '-': log += "\t(*p)--;\n"; break;
+		case '.': log += "\tputc(*p);\n"; break;
+		case ',': break;
+		case '[': log += "\twhile (*p) {\n"; break;
+		case ']': log += "\t}\n"; break;
+		}
+	}
+	log += footer;
+	output.value = log;
+}
+
+</script>
+</body>
+</html>
