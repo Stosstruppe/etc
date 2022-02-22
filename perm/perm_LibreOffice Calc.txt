@@ -1,0 +1,20 @@
+' 順列(permutation)
+Option VBASupport 1
+
+Dim row As Integer
+
+Sub Main
+	row = 1
+	perm "", "ABCD"
+End Sub
+
+Sub perm(dst As String, src As String)
+	If Len(src) = 0 Then
+		Cells(row, 1) = dst
+		row = row + 1
+		Exit Sub
+	End If
+	For i = 1 To Len(src)
+		perm dst & Mid(src, i, 1), Left(src, i-1) & Mid(src, i+1)
+	Next
+End Sub
