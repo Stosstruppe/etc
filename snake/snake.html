@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>snake1</title>
+<style>
+#output {
+	background: #f0f0f0;
+}
+</style>
+</head>
+
+<body>
+<pre id="output"></pre>
+<script>
+
+"use strict";
+
+const mm = 100;
+let mx = [];	// リングバッファ
+let my = [];
+let mh;		// head
+let mt;		// tail
+let md;		// dir
+
+const dx = [ 0,  1,  0, -1];
+const dy = [-1,  0,  1,  0];
+const qn = 20;	// 餌
+let qc;
+let ta;		// tail add
+let phase;
+
+let vram;	// 仮想TEXT VRAM
+let keys = [];
+let ac;
+let gain;
+
+onload = function() {
+	ac = new AudioContext();
+	gain = ac.createGain();
+	gain.connect(ac.destination);
+	gain.gain.value = 0.05;
+
+	onkeydown = function(e) {
+		keys[e.keyCode] = true;
+		switch (phase) {
+		case 1:
+			game_init();
+			break;
+		case 3:
+			if (e.keyCode == 89) {	// y
+				game_init();
+			}
+			break;
+		}
+	};
+	onkeyup = function(e) {
+		keys[e.keyCode] = false;
+	};
+
+	title();
+};
+
+function title() {
+	phase = 1;
+	cls();
+	let x = 4, y = 5;
+	print(x, y++, "### # # ###   ## ##   #  # # ###");
+	print(x, y++, " #  # # #    #   # # # # # # #  ");
+	print(x, y++, " #  ### ##    #  # # ### ##  ## ");
+	print(x, y++, " #  # # #      # # # # # # # #  ");
+	print(x, y++, " #  # # ###  ##  # # # # # # ###");
+	print(14, 12, "Hit any key");
+	disp();
+}
+
+function game_init() {
+	phase = 2;
+	cls();
+
+	// 外枠
+	for (let x = 1; x <= 38; x++) {
+		putc(x,  0, "#");
+		putc(x, 24, "#");
+	}
+	for (let y = 1; y <= 23; y++) {
+		putc( 0, y, "#");
+		putc(39, y, "#");
+	}
+
+	// 自機
+	{
+		let x = 16;
+		let y = 12;
+		let i;
+		for (i = 0; i < 4; i++) {
+			mx[i] = x;
+			my[i] = y;
+			putc(x, y, "o");
+			x++;
+		}
+		mx[i] = x;
+		my[i] = y;
+		putc(x, y, "O");
+		mh = i;
+		mt = 0;
+		md = 1;
+	}
+
+	// 餌
+	for (let i = 0; i < qn; i++) {
+		let x, y;
+		do {
+			x = fnr(36, 2);
+			y = fnr(21, 2);
+		} while (vpeek(x, y) != " ");
+		putc(x, y, "$");
+	}
+
+	// 障害物
+	for (let i = 0; i < 10; i++) {
+		let x, y;
+		do {
+			x = fnr(36, 2);
+			y = fnr(21, 2);
+		} while (vpeek(x, y) != " ");
+		putc(x, y, "#");
+	}
+
+	qc = 0;
+	ta = 0;
+	game_loop();
+}
+
+function game_loop() {
+
+	// 頭→体
+	let x = mx[mh];
+	let y = my[mh];
+	putc(x, y, "o");
+
+	// 移動
+	if (keys[37]) md = 3;	// Left
+	if (keys[38]) md = 0;	// Up
+	if (keys[39]) md = 1;	// Right
+	if (keys[40]) md = 2;	// Down
+	x += dx[md];
+	y += dy[md];
+
+	switch (vpeek(x, y)) {
+	case " ":
+		break;
+	case "$":
+		qc++;
+		ta += 3;
+		break;
+	default:
+		putc(x, y, "*");
+		game_over();
+		return;
+	}
+
+	// 頭
+	mh = (mh + 1) % mm;
+	mx[mh] = x;
+	my[mh] = y;
+	putc(x, y, "O");
+
+	if (qc >= qn) {
+		print(11, 10, " Congratulations! ");
+		game_over();
+		return;
+	}
+
+	// 尻尾
+	if (ta) {
+		beep();
+		ta--;
+	} else {
+		putc(mx[mt], my[mt], " ");
+		mt = (mt + 1) % mm;
+	}
+
+	disp();
+	setTimeout(game_loop, 1000 / 6);
+}
+
+function game_over() {
+	phase = 3;
+	print(11, 12, " Try again? [y/n] ");
+	disp();
+	beep();
+}
+
+function fnr(a, b) {
+	return Math.floor(Math.random() * a) + b;
+}
+
+function cls() {
+	vram = [];
+	for (let y = 0; y < 25; y++) {
+		vram[y] = Array(40).fill(" ");
+	}
+}
+
+function putc(x, y, c) {
+	vram[y][x] = c;
+}
+
+function print(x, y, s) {
+	for (let i = 0; i < s.length; i++) {
+		vram[y][x++] = s[i];
+	}
+}
+
+function vpeek(x, y) {
+	return vram[y][x];
+}
+
+function disp() {
+	let txt = "";
+	for (let y = 0; y < 25; y++) {
+		txt += vram[y].join("") + "\n";
+	}
+	output.textContent = txt;
+}
+
+function beep() {
+	let osc = ac.createOscillator();
+	osc.type = "square";
+	osc.frequency.value = 2000;
+	osc.connect(gain);
+	osc.start();
+	osc.stop(ac.currentTime + 0.1);
+}
+
+</script>
+</body>
+</html>
