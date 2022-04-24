@@ -35,10 +35,11 @@ OnPaint proc hWnd:HWND
 	mov	hdc, eax
 
 	invoke	GetClientRect, hWnd, addr rc
+	mov	ecx, sizeof TRIVERTEX
 	mov	eax, rc.right
-	mov	vtx.x[16], eax
+	mov	vtx.x[ecx], eax
 	mov	eax, rc.bottom
-	mov	vtx.y[16], eax
+	mov	vtx.y[ecx], eax
 	mov	mesh.UpperLeft, 0
 	mov	mesh.LowerRight, 1
 	invoke	GradientFill, hdc, addr vtx, 2, addr mesh, 1, GRADIENT_FILL_RECT_V
