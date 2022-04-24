@@ -15,24 +15,13 @@ includelib kernel32.lib
 includelib msimg32.lib
 includelib user32.lib
 
-COLOR16	equ	DW
-
 .const
 APP_NAME	db	'GradientFill', 0
 
 .data
-vtx	LONG	0	; TRIVERTEX[2]
-	LONG	0
-	COLOR16	0
-	COLOR16	0
-	COLOR16	0ffffh
-	COLOR16	0
-vtx1x	LONG	0
-vtx1y	LONG	0
-	COLOR16	0
-	COLOR16	0
-	COLOR16	0
-	COLOR16	0
+vtx	TRIVERTEX \
+	< 0, 0, 00000h, 00000h, 0ffffh, 00000h >, \
+	< 0, 0, 00000h, 00000h, 00000h, 00000h >
 
 .code
 
@@ -47,9 +36,9 @@ OnPaint proc hWnd:HWND
 
 	invoke	GetClientRect, hWnd, addr rc
 	mov	eax, rc.right
-	mov	vtx1x, eax
+	mov	vtx.x[16], eax
 	mov	eax, rc.bottom
-	mov	vtx1y, eax
+	mov	vtx.y[16], eax
 	mov	mesh.UpperLeft, 0
 	mov	mesh.LowerRight, 1
 	invoke	GradientFill, hdc, addr vtx, 2, addr mesh, 1, GRADIENT_FILL_RECT_V
