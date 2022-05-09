@@ -1,0 +1,158 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    05/09/22 17:55:54
+mdmp.asm						     Page 1 - 1
+
+
+				comment *
+				ml /c /AT /Fl mdmp.asm
+				link16 /t mdmp;
+				*
+				.186
+				.model tiny
+ 0000				.code
+					org	0100h
+ 0100				start:
+ 0100  8C D8				mov	ax, ds
+ 0102  8E C0				mov	es, ax
+ 0104  BE 0000				mov	si, 0000h
+ 0107  E8 0001				call	mdmp
+ 010A  C3				ret
+
+				; memory dump
+				; in:	si: 読込アドレス
+ 010B				mdmp:
+ 010B  B9 0010				mov	cx, 16
+ 010E				mdmp1:
+ 010E  51				push	cx
+ 010F  89 36 01CE R			mov	adrs, si
+ 0113  E8 000B				call	ldmp
+ 0116  8B 36 01CE R			mov	si, adrs
+ 011A  83 C6 10				add	si, 16
+ 011D  59				pop	cx
+ 011E  E2 EE				loop	mdmp1
+ 0120  C3				ret
+
+				; line dump
+				; in:	si: 読込アドレス
+ 0121				ldmp:
+ 0121  FC				cld
+ 0122  BF 0186 R			mov	di, offset line
+ 0125  8B C6				mov	ax, si
+ 0127  86 E0				xchg	ah, al
+ 0129  E8 002A				call	bdmp
+ 012C  8B C6				mov	ax, si
+ 012E  E8 0025				call	bdmp
+
+ 0131  BF 018B R			mov	di, offset line + 5
+ 0134  B9 0010				mov	cx, 16
+ 0137				ldmp1:
+ 0137  AC				lodsb
+ 0138  E8 001B				call	bdmp
+ 013B  47				inc	di		; skip
+ 013C  E2 F9				loop	ldmp1
+
+ 013E  8B 36 01CE R			mov	si, adrs
+ 0142  BF 01BB R			mov	di, offset line + 5+3*16
+ 0145  B9 0010				mov	cx, 16
+ 0148				ldmp2:
+ 0148  AC				lodsb
+ 0149  E8 001A				call	admp
+ 014C  E2 FA				loop	ldmp2
+
+ 014E  BA 0186 R			mov	dx, offset line
+ 0151  B4 09				mov	ah, 09h
+ 0153  CD 21				int	21h
+ 0155  C3				ret
+
+				; binary dump
+				; in:	al: 値
+				; 	di: 書込アドレス
+ 0156				bdmp:
+ 0156  BB 0176 R			mov	bx, offset hdigit
+ 0159  8A E0				mov	ah, al
+ 015B  24 0F				and	al, 0fh
+ 015D  D7				xlat			; al<-[bx+al]
+ 015E  86 E0				xchg	ah, al
+ 0160  C0 E8 04				shr	al, 4
+ 0163  D7				xlat
+ 0164  AB				stosw
+ 0165  C3				ret
+
+				; ascii dump
+				; in:	al: 値
+				; 	di: 書込アドレス
+ 0166				admp:
+ 0166  3C 20				cmp	al, 20h
+ 0168  72 08				jb	admp1		; al < 20h
+ 016A  3C 7F				cmp	al, 7fh
+ 016C  73 04				jae	admp1		; al >= 7fh
+ 016E  3C 24				cmp	al, '$'
+ 0170  75 02				jne	admp2		; al != '$'
+ 0172				admp1:
+ 0172  B0 2E				mov	al, '.'
+ 0174				admp2:
+ 0174  AA				stosb
+ 0175  C3				ret
+
+ 0176 30 31 32 33 34 35		hdigit	db	'0123456789ABCDEF'
+       36 37 38 39 41 42
+       43 44 45 46
+ 0186 78 78 78 78 3A 78		line	db	'xxxx:xx xx xx xx-xx xx xx xx-xx xx xx xx-xx xx xx xx:'
+       78 20 78 78 20 78
+       78 20 78 78 2D 78
+       78 20 78 78 20 78
+       78 20 78 78 2D 78
+       78 20 78 78 20 78
+       78 20 78 78 2D 78
+       78 20 78 78 20 78
+       78 20 78 78 3A
+ 01BB  30 31 32 33 34 35		db	'0123456789abcdef',0dh,0ah,'$'
+       36 37 38 39 61 62
+       63 64 65 66 0D 0A
+       24
+ 01CE 0000			adrs	dw	0
+
+				end start
+Microsoft (R) Macro Assembler Version 6.14.8444		    05/09/22 17:55:54
+mdmp.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_TEXT  . . . . . . . . . . . . .	16 Bit	 01D0	  Word	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	16 Bit	 0000	  Word	  Public  'DATA'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0001h	 
+@code  . . . . . . . . . . . . .	Text   	 DGROUP
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+admp1  . . . . . . . . . . . . .	L Near	 0172	  _TEXT	
+admp2  . . . . . . . . . . . . .	L Near	 0174	  _TEXT	
+admp . . . . . . . . . . . . . .	L Near	 0166	  _TEXT	
+adrs . . . . . . . . . . . . . .	Word	 01CE	  _TEXT	
+bdmp . . . . . . . . . . . . . .	L Near	 0156	  _TEXT	
+hdigit . . . . . . . . . . . . .	Byte	 0176	  _TEXT	
+ldmp1  . . . . . . . . . . . . .	L Near	 0137	  _TEXT	
+ldmp2  . . . . . . . . . . . . .	L Near	 0148	  _TEXT	
+ldmp . . . . . . . . . . . . . .	L Near	 0121	  _TEXT	
+line . . . . . . . . . . . . . .	Byte	 0186	  _TEXT	
+mdmp1  . . . . . . . . . . . . .	L Near	 010E	  _TEXT	
+mdmp . . . . . . . . . . . . . .	L Near	 010B	  _TEXT	
+start  . . . . . . . . . . . . .	L Near	 0100	  _TEXT	
+
+	   0 Warnings
+	   0 Errors
