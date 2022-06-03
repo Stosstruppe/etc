@@ -1,0 +1,40 @@
+; dev.bat
+@echo off
+set ZCCCFG=C:\etc\z88dk\lib\config
+path C:\etc\z88dk\bin;%path%
+cmd
+
+; Web site
+https://webmsx.org/?MACHINE=MSX2PJ
+
+; build
+zcc +msx -lndos -llib3d -create-app -bnex1 ex1.c
+
+zcc +msx -lndos -llib3d -create-app -bnex1b ex1b.c
+
+zcc +msx -lndos -create-app -bnex2 ex2.c
+
+zcc +msx -lndos -create-app -bnex3 ex3.c
+
+zcc +msx -lndos -lm -create-app -bnex4 ex4.c
+
+zcc +msx -lndos -lm -lmsxbios -create-app -bnex5 ex5.c
+zcc +msx -lndos -lm -create-app -bnex5 ex5.c
+; 失敗
+
+zcc +msx -lndos -lmsxbios -create-app -bnex6 ex6.c
+
+zcc +msx -lndos -lmsxbios -create-app -bnex7 ex7.c
+
+zcc +msx -subtype=msxdos -lmsxbios -oex8.com ex8.c
+
+zcc +msx -lndos -llib3d -create-app -bnex9 ex9.c
+
+zcc +msx -lndos -create-app -bnex10 ex10.c
+
+zcc +msx -lndos -llib3d -lm -lmsxbios -DAMALLOC -create-app -bnex11 ex11.c
+; 失敗
+
+zcc +msx -lndos -llib3d -lmsxbios -DAMALLOC -create-app -bnshowlib3d showlib3d.c
+
+zcc +msx -lndos -create-app -bnvpoke vpoke.c
