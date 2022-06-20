@@ -1,0 +1,12 @@
+ps0	$ba00	空白
+ps1	$ba80	キャラ
+gput	$bb00	機械語
+	$bf00 ワーク
+
+mx
+my
+mt
+md
+
+pd0
+pd1	$c000+80*y+x
