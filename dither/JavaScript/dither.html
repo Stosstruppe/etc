@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>dither</title>
+</head>
+
+<body>
+<input type="file" onchange="fileChange(event);"><br>
+img<br>
+<img id="img"><br>
+canvas<br>
+<canvas id="canvas"></canvas><br>
+<input type="button" value="download" onclick="download();"><br>
+<script>
+
+"use strict";
+
+function fileChange(e) {
+	let file = e.target.files[0];
+	let fr = new FileReader();
+	fr.onload = function(e) {
+		img.onload = function(e) {
+			draw();
+		};
+		img.src = e.target.result;
+	};
+	fr.readAsDataURL(file);
+}
+
+function draw() {
+	const n = 4;
+	const m = [
+		[ 0x08, 0x88, 0x28, 0xa8 ],
+		[ 0xc8, 0x48, 0xe8, 0x68 ],
+		[ 0x38, 0xb8, 0x18, 0x98 ],
+		[ 0xf8, 0x78, 0xd8, 0x58 ],
+	];
+
+//	let cw = img.width;
+//	let ch = img.height;
+	let cw = 640;
+	let ch = 400;
+	canvas.width = cw;
+	canvas.height = ch;
+	let ctx = canvas.getContext("2d");
+	ctx.drawImage(img, 0, 0);
+
+	let imgData = ctx.getImageData(0, 0, cw, ch);
+	let data = imgData.data;
+	for (let y = 0; y < ch; y++) {
+		let v = y % n;
+		for (let x = 0; x < cw; x++) {
+			let u = x % n;
+			let t = m[v][u];
+			let p = (cw*y + x)*4;
+			for (let i = 0; i < 3; i++) {
+				data[p+i] = (data[p+i] < t) ? 0x00 : 0xff;
+			}
+		}
+	}
+	ctx.putImageData(imgData, 0, 0);
+}
+
+function download() {
+	let ctx = canvas.getContext("2d");
+	let imgData = ctx.getImageData(0, 0, 640, 400);
+	let data = imgData.data;
+
+	const rgb = [ 2, 0, 1 ];
+	let bmp = new Uint8Array(80 * 400 * 3);
+	let idx = 0;
+	for (let plane = 0; plane < 3; plane++) {
+		let c = rgb[plane];
+		for (let y = 0; y < 400; y++) {
+			for (let x = 0; x < 640; x += 8) {
+				let bits = 0;
+				for (let i = 0; i < 8; i++) {
+					let b = (data[(640*y+x+i)*4+c] < 0x80) ? 0 : 1;
+					bits = (bits<<1) | b;
+				}
+				bmp[idx++] = bits;
+			}
+		}
+	}
+
+	let blob = new Blob([bmp.buffer], {type:"application/x-binary"});
+	let url = URL.createObjectURL(blob);
+	let a = document.createElement("a");
+	document.body.appendChild(a);
+	a.download = "sample.bin";
+	a.href = url;
+	a.click();
+	a.remove();
+	URL.revokeObjectURL(url);
+}
+
+</script>
+</body>
+</html>
