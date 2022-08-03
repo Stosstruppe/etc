@@ -1,0 +1,2 @@
+d88saver work.d88 test.dat -bas
+d88saver work.d88 -files

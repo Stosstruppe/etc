@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>dither</title>
+</head>
+
+<body>
+<input type="file" onchange="fileChange(event);"><br>
+img<br>
+<img id="img"><br>
+canvas<br>
+<canvas id="canvas"></canvas><br>
+<input type="button" value="download" onclick="download();"><br>
+<script>
+
+"use strict";
+
+function fileChange(e) {
+	let file = e.target.files[0];
+	let fr = new FileReader();
+	fr.onload = function(e) {
+		img.onload = function(e) {
+			draw();
+		};
+		img.src = e.target.result;
+	};
+	fr.readAsDataURL(file);
+}
+
+function draw() {
+//	let cw = img.width;
+//	let ch = img.height;
+	let cw = 640;
+	let ch = 200;
+	canvas.width = cw;
+	canvas.height = ch;
+	let ctx = canvas.getContext("2d");
+	ctx.drawImage(img, 0, 0, cw, ch);
+
+	const pat = [
+		[ 1, 3 ],
+		[ 4, 2 ],
+	];
+	let imgData = ctx.getImageData(0, 0, cw, ch);
+	let data = imgData.data;
+	for (let y = 0; y < ch; y++) {
+		let v = y % 2;
+		for (let x = 0; x < cw; x++) {
+			let u = x % 2;
+			let t = pat[v][u] * 256 / 5;
+			let p = (cw * y + x) * 4;
+			data[p+0] = (data[p+0] < t) ? 0 : 0xff;
+			data[p+1] = (data[p+1] < t) ? 0 : 0xff;
+			data[p+2] = (data[p+2] < t) ? 0 : 0xff;
+		}
+	}
+	ctx.putImageData(imgData, 0, 0);
+}
+
+function download() {
+	let ctx = canvas.getContext("2d");
+	let imgData = ctx.getImageData(0, 0, 640, 200);
+	let data = imgData.data;
+
+	const rgb = [ 2, 0, 1 ];
+	let bmp = new Uint8Array(16384 * 3);
+	for (let p = 0; p < 3; p++) {
+		let idx = 16384 * p;
+		let c = rgb[p];
+		for (let y = 0; y < 200; y++) {
+			for (let x = 0; x < 640; x += 8) {
+				let bits = 0;
+				for (let i = 0; i < 8; i++) {
+					let b = (data[(640*y+x+i)*4+c] < 0x80) ? 0 : 1;
+					bits = (bits<<1) | b;
+				}
+				bmp[idx++] = bits;
+			}
+		}
+	}
+
+	let blob = new Blob([bmp.buffer]);
+	let url = URL.createObjectURL(blob);
+	let a = document.createElement("a");
+	document.body.appendChild(a);
+	a.download = "test.dat";
+	a.href = url;
+	a.click();
+	a.remove();
+	URL.revokeObjectURL(url);
+}
+
+</script>
+</body>
+</html>

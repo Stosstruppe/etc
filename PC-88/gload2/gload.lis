@@ -1,0 +1,27 @@
+gload.asm:
+     1                          ;z80asm -b -l gload.asm
+     2                          
+     3                          port	equ	$bff0
+     4                          dst	equ	$bff1
+     5                          src	equ	$bff3
+     6                          
+     7                          	org	$bf00 - 4
+     8   000000 0400            	dw	Lstart
+     9   000002 1f00            	dw	Lend
+    10                          Lstart	equ	$
+    11                          
+    12   000004 2af3bf          	ld	hl, (src)
+    13   000007 ed5bf1bf        	ld	de, (dst)
+    14   00000b 3af0bf          	ld	a, (port)
+    15   00000e 4f              	ld	c, a
+    16   00000f f3              	di
+    17   000010 ed79            	out	(c), a
+    18   000012 010001          	ld	bc, 256
+    19   000015 edb0            	ldir
+    20   000017 d35f            	out	($5f), a
+    21   000019 fb              	ei
+    22   00001a ed53f1bf        	ld	(dst), de
+    23   00001e c9              	ret
+    24                          
+    25                          Lend	equ	$
+    26                          
