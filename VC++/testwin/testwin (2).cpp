@@ -1,4 +1,4 @@
-#include <Windows.h>
+﻿#include <Windows.h>
 
 void Render(HWND hWnd)
 {
@@ -23,7 +23,7 @@ void Render(HWND hWnd)
 
 	ReleaseDC(hWnd, hdc);
 
-	// �҂�
+	// 待ち
 	if (sch > t) {
 		Sleep(sch - t);
 		sch += 17;
