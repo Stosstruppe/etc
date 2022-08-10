@@ -73,7 +73,6 @@ void Draw()
 
 	WCHAR buf[512];
 	int c = wsprintf(buf, L"fps:%d count:%d", fps, count);
-	count++;
 
 	//
 	g_pRender->BeginDraw();
