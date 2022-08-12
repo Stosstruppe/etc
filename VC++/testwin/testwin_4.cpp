@@ -1,4 +1,4 @@
-#include <Windows.h>
+ï»¿#include <Windows.h>
 
 HDC hdcMem;
 HBITMAP hBmp;
@@ -14,7 +14,7 @@ void Draw(HWND hWnd)
 	static int fps;
 	static DWORD schedule;
 
-	// fpsŒv‘ª
+	// fpsè¨ˆæ¸¬
 	DWORD tick = GetTickCount();
 	if (prev != tick / 1000) {
 		prev = tick / 1000;
@@ -27,7 +27,7 @@ void Draw(HWND hWnd)
 	if (keys[VK_LEFT]) mx -= 4;
 	if (keys[VK_RIGHT]) mx += 4;
 
-	// ƒNƒŠƒA
+	// ã‚¯ãƒªã‚¢
 	HDC hdc = hdcMem;
 	RECT rcClt;
 	GetClientRect(hWnd, &rcClt);
@@ -49,7 +49,7 @@ void Draw(HWND hWnd)
 	BitBlt(hdcWnd, 0, 0, rcClt.right, rcClt.bottom, hdcMem, 0, 0, SRCCOPY);
 	ReleaseDC(hWnd, hdcWnd);
 
-	// fps§Œä
+	// fpsåˆ¶å¾¡
 	tick = GetTickCount();
 	if (schedule > tick) {
 		Sleep(schedule - tick);
