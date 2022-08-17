@@ -1,0 +1,122 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    08/17/22 11:00:31
+gload.asm						     Page 1 - 1
+
+
+				comment *
+				ml /c gload.asm
+				link16 /t gload;
+				*
+
+ = 0002				STDERR	equ	2
+
+				.model tiny
+ 0000				.code
+					org	0100h
+ 0100				main proc
+ 0100  B0 00				mov	al, 00h		; 8色
+ 0102  E6 6A				out	6ah, al
+ 0104  B0 4B				mov	al, 4bh		; CSRFORM
+ 0106  E6 A2				out	0a2h, al
+ 0108  B0 00				mov	al, 00h
+ 010A  E6 A0				out	0a0h, al
+ 010C  B0 08				mov	al, 08h		; 400ライン
+ 010E  E6 68				out	68h, al
+ 0110  B0 0D				mov	al, 0dh		; START
+ 0112  E6 A2				out	0a2h, al
+
+					; ファイルを開く
+ 0114  BA 0162 R			mov	dx, offset fname
+ 0117  B0 00				mov	al, 00h		; read
+ 0119  B4 3D				mov	ah, 3dh
+ 011B  CD 21				int	21h
+ 011D  73 12				jnc	@f
+
+ 011F  BA 0171 R			mov	dx, offset msg
+ 0122  B9 0012				mov	cx, msglen
+ 0125  BB 0002				mov	bx, STDERR
+ 0128  B4 40				mov	ah, 40h
+ 012A  CD 21				int	21h
+ 012C  B8 4C01				mov	ax, 4c01h
+ 012F  CD 21				int	21h
+ 0131				@@:
+ 0131  A3 016D R			mov	hfile, ax
+ 0134  B9 0003				mov	cx, 3
+ 0137				@@:
+ 0137  51				push	cx
+
+					; ファイルを読み込む
+ 0138  BA 0000				mov	dx, 0
+ 013B  B9 7D00				mov	cx, 32000
+ 013E  8B 1E 016D R			mov	bx, hfile
+ 0142  1E				push	ds
+ 0143  8E 1E 016F R			mov	ds, gseg
+ 0147  B4 3F				mov	ah, 3fh
+ 0149  CD 21				int	21h
+ 014B  1F				pop	ds
+
+ 014C  81 06 016F R 0800		add	gseg, 800h
+ 0152  59				pop	cx
+ 0153  E2 E2				loop	@b
+
+					; ファイルを閉じる
+ 0155  8B 1E 016D R			mov	bx, hfile
+ 0159  B4 3E				mov	ah, 3eh
+ 015B  CD 21				int	21h
+ 015D  B8 4C00				mov	ax, 4c00h
+ 0160  CD 21				int	21h
+ 0162				main endp
+
+ 0162 73 61 6D 70 6C 65		fname	db	'sample.bin', 0
+       2E 62 69 6E 00
+ 016D 0000			hfile	dw	?
+ 016F A800			gseg	dw	0a800h
+ 0171 66 69 6C 65 20 6F		msg	db	'file open error.', 0dh, 0ah
+       70 65 6E 20 65 72
+       72 6F 72 2E 0D 0A
+ 0183 = 0012			msglen	equ	$ - msg
+
+				end main
+Microsoft (R) Macro Assembler Version 6.14.8444		    08/17/22 11:00:31
+gload.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0183	  Word	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	16 Bit	 0000	  Word	  Public  'DATA'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+main . . . . . . . . . . . . . .	P Near	 0100	  _TEXT	Length= 0062 Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0001h	 
+@code  . . . . . . . . . . . . .	Text   	 DGROUP
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+STDERR . . . . . . . . . . . . .	Number	 0002h	 
+fname  . . . . . . . . . . . . .	Byte	 0162	  _TEXT	
+gseg . . . . . . . . . . . . . .	Word	 016F	  _TEXT	
+hfile  . . . . . . . . . . . . .	Word	 016D	  _TEXT	
+msglen . . . . . . . . . . . . .	Number	 0012h	 
+msg  . . . . . . . . . . . . . .	Byte	 0171	  _TEXT	
+
+	   0 Warnings
+	   0 Errors
