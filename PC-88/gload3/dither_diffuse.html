@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>dither</title>
+<style>
+#canvas {
+	image-rendering: pixelated;
+	width: 640px;
+	height: 400px;
+}
+</style>
+</head>
+
+<body>
+<input type="file" onchange="fileChange(event);"><br>
+img<br>
+<img id="img"><br>
+canvas<br>
+<canvas id="canvas"></canvas><br>
+<input type="button" value="download" onclick="download();"><br>
+<script>
+
+"use strict";
+
+const cw = 640;
+const ch = 200;
+let error;
+
+function fileChange(e) {
+	let file = e.target.files[0];
+	let fr = new FileReader();
+	fr.onload = function(e) {
+		img.onload = function(e) {
+			draw();
+		};
+		img.src = e.target.result;
+	};
+	fr.readAsDataURL(file);
+}
+
+function draw() {
+	canvas.width = cw;
+	canvas.height = ch;
+	let ctx = canvas.getContext("2d");
+	ctx.drawImage(img, 0, 0, cw, ch);
+
+	let imgData = ctx.getImageData(0, 0, cw, ch);
+	let data = imgData.data;
+
+	for (let z = 0; z < 3; z++) {
+		error = [];
+		for (let y = 0; y < ch; y++) {
+			error[y] = [];
+			for (let x = 0; x < cw; x++) {
+				error[y][x] = 0;
+			}
+		}
+
+		let idx = z;
+		for (let y = 0; y < ch; y++) {
+			for (let x = 0; x < cw; x++) {
+				let c = data[idx] + error[y][x];
+				let v = (c < 128) ? 0 : 255;
+				data[idx] = v;
+				idx += 4;
+
+				let e = (c - v) / 16;
+				diff(x+1, y,   e*7);
+				diff(x-1, y+1, e*3);
+				diff(x,   y+1, e*5);
+				diff(x+1, y+1, e  );
+			}
+		}
+	}
+
+	ctx.putImageData(imgData, 0, 0);
+}
+
+// 誤差拡散 error diffusion
+function diff(x, y, e) {
+	if (x<0 || cw<=x || y<0 || ch<=y) return;
+	error[y][x] += e;
+}
+
+function download() {
+	let ctx = canvas.getContext("2d");
+	let imgData = ctx.getImageData(0, 0, cw, ch);
+	let data = imgData.data;
+
+	const rgb = [ 2, 0, 1 ];
+	let bmp = new Uint8Array(16384 * 3);
+	for (let p = 0; p < 3; p++) {
+		let idx = 16384 * p;
+		let c = rgb[p];
+		for (let y = 0; y < 200; y++) {
+			for (let x = 0; x < 640; x += 8) {
+				let bits = 0;
+				for (let i = 0; i < 8; i++) {
+					let b = (data[(640*y+x+i)*4+c] < 0x80) ? 0 : 1;
+					bits = (bits<<1) | b;
+				}
+				bmp[idx++] = bits;
+			}
+		}
+	}
+
+	let blob = new Blob([bmp.buffer]);
+	let url = URL.createObjectURL(blob);
+	let a = document.createElement("a");
+	document.body.appendChild(a);
+	a.download = "TEST.DAT";
+	a.href = url;
+	a.click();
+	a.remove();
+	URL.revokeObjectURL(url);
+}
+
+</script>
+</body>
+</html>
