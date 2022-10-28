@@ -1,0 +1,138 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/28/22 18:03:10
+mul.asm							     Page 1 - 1
+
+
+				comment *
+				ml /c /coff /Fl /Sa mul.asm
+				link /subsystem:console mul
+				*
+				includelib msvcrt
+
+				.386
+				.model flat
+
+				exit proto c :dword
+				printf proto c :dword, :vararg
+
+ 00000000			.const
+ 00000000 5B 25 64 5D 0A	msg	db	'[%d]',0ah,0
+	   00
+
+ 00000000			.data?
+ 00000000 00000000		a$	dd	?
+ 00000004 00000000		b$	dd	?
+ 00000008 00000000		c$	dd	?
+
+ 00000000			.code
+
+ 00000000			mul32 proc c pc$:dword, pa$:dword, pb$:dword
+ 00000000  55		   *	    push   ebp
+ 00000001  8B EC	   *	    mov    ebp, esp
+ 00000003  56				push	esi
+ 00000004  57				push	edi
+
+ 00000005  8B 75 0C			mov	esi, pa$
+ 00000008  8B 7D 10			mov	edi, pb$
+								; a[0] * b[1]
+ 0000000B  66| 8B 06			mov	ax, [esi]
+ 0000000E  66| 8B 4F 02			mov	cx, [edi+2]
+ 00000012  66| F7 E1			mul	cx
+ 00000015  66| 50			push	ax
+								; a[1] * b[0]
+ 00000017  66| 8B 46 02			mov	ax, [esi+2]
+ 0000001B  66| 8B 0F			mov	cx, [edi]
+ 0000001E  66| F7 E1			mul	cx
+ 00000021  66| 50			push	ax
+								; dx:ax = a[0] * b[0]
+ 00000023  66| 8B 06			mov	ax, [esi]
+ 00000026  66| 8B 0F			mov	cx, [edi]
+ 00000029  66| F7 E1			mul	cx
+ 0000002C  66| 59			pop	cx
+ 0000002E  66| 03 D1			add	dx, cx
+ 00000031  66| 59			pop	cx
+ 00000033  66| 03 D1			add	dx, cx
+
+ 00000036  8B 7D 08			mov	edi, pc$
+ 00000039  66| 89 07			mov	[edi], ax
+ 0000003C  66| 89 57 02			mov	[edi+2], dx
+
+ 00000040  5F				pop	edi
+ 00000041  5E				pop	esi
+					ret
+ 00000042  C9		   *	    leave  
+ 00000043  C3		   *	    ret    00000h
+ 00000044			mul32 endp
+
+ 00000044			start proc c
+ 00000044  C7 05 00000000 R		mov	a$, 100000
+	   000186A0
+ 0000004E  C7 05 00000004 R		mov	b$, 123
+	   0000007B
+					invoke	mul32, addr c$, addr a$, addr b$
+ 00000058  68 00000004 R   *	    push   OFFSET b$
+ 0000005D  68 00000000 R   *	    push   OFFSET a$
+ 00000062  68 00000008 R   *	    push   OFFSET c$
+ 00000067  E8 FFFFFF94	   *	    call   mul32
+ 0000006C  83 C4 0C	   *	    add    esp, 00000000Ch
+					invoke	printf, addr msg, c$
+ 0000006F  FF 35 00000008 R *	    push   c$
+ 00000075  68 00000000 R   *	    push   OFFSET msg
+ 0000007A  E8 00000000 E   *	    call   printf
+ 0000007F  83 C4 08	   *	    add    esp, 000000008h
+					invoke	exit, 0
+ 00000082  6A 00	   *	    push   +000000000h
+ 00000084  E8 00000000 E   *	    call   exit
+ 00000089  83 C4 04	   *	    add    esp, 000000004h
+ 0000008C			start endp
+
+				end start
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/28/22 18:03:10
+mul.asm							     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CONST  . . . . . . . . . . . . .	32 Bit	 00000006 DWord	  Public  'CONST'	 ReadOnly
+FLAT . . . . . . . . . . . . . .	GROUP
+_BSS . . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'BSS'  
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000008C DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+exit . . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+mul32  . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000044 Public C
+  pc$  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  pa$  . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  pb$  . . . . . . . . . . . . .	DWord	 bp + 00000010
+printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+start  . . . . . . . . . . . . .	P Near	 00000044 _TEXT	Length= 00000048 Public C
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+a$ . . . . . . . . . . . . . . .	DWord	 00000000 _BSS	
+b$ . . . . . . . . . . . . . . .	DWord	 00000004 _BSS	
+c$ . . . . . . . . . . . . . . .	DWord	 00000008 _BSS	
+msg  . . . . . . . . . . . . . .	Byte	 00000000 CONST	
+
+	   0 Warnings
+	   0 Errors
