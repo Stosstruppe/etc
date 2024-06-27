@@ -1,0 +1,32 @@
+100 screen 0,0:color ,,,7:cls 2
+110 cx=320:cy=100:cr=90:rd=3.14/180
+120 dim t$(4,1),tb(6),tr(6),tg(6)
+130 for i=0 to 4:for j=0 to 1
+140  read d$:t$(i,j)=chr$(val("&h"+d$))
+150 next j,i
+160 data 00,00, 55,00, 55,aa, ff,aa, ff,ff
+170 for i=1 to 6:read tb(i),tr(i),tg(i):next
+180 data 1,0,0, 0,1,0, 1,1,0, 0,0,1, 1,0,1, 0,1,1
+200 '
+210 for i=0 to 60 step 30
+220  a=i*rd:r=2*cr*cos(a)
+230  circle(cx,cy),r,,,,cr/r
+240 next
+250 line(cx,cy-cr)-(cx,cy+cr)
+300 '
+310 for i=-60 to 60 step 30
+320  a=i*rd:x=2*cr*cos(a):y=cy-cr*sin(a)
+330  line(cx-x,y)-(cx+x,y)
+340 next
+400 '
+410 for i=1 to 4
+420  a=(30*i-75)*rd:y=cy-cr*sin(a):z=2*cr*cos(a)
+430  for j=1 to 6
+440   a=(30*j-105)*rd:x=cx+z*sin(a)
+450   b=tb(j)*i:r=tr(j)*i:g=tg(j)*i
+460   paint(x,y),t$(b,0)+t$(r,0)+t$(g,0)+t$(b,1)+t$(r,1)+t$(g,1)
+470 next j,i
+500 '
+510 c=0
+520 for i=1 to 6:color=(i,(c+6-i)mod 8):next
+530 c=(c+1)mod 8:goto 520
